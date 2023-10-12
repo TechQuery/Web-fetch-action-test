@@ -9,6 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      issues: write
     steps:
       - uses: actions/checkout@v3
 
@@ -16,6 +17,7 @@ jobs:
         with:
           githubToken: ${{ github.token }}
           newsLink: "${{ github.event.issue.Body }}"
+          ignoreSelector: ".ad-wrapper"
           markDownFilePath: "./articles/"
 
       - uses: stefanzweifel/git-auto-commit-action@v5
