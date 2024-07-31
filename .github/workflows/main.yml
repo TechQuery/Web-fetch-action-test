@@ -11,14 +11,27 @@ jobs:
       contents: write
       issues: write
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - uses: freeCodeCamp-China/article-webpage-to-markdown-action@simplify-code-structure
+      - id: fetch-md
+        uses: freeCodeCamp-China/article-webpage-to-markdown-action@set-outputs
         with:
           githubToken: ${{ github.token }}
-          newsLink: "${{ github.event.issue.Body }}"
-          ignoreSelector: ".ad-wrapper"
-          markDownFilePath: "./articles/"
+          pageURL: "${{ github.event.issue.body }}"
+          includedSelector: ".post-full-content"
+          excludedSelector: ".ad-wrapper"
+          markdownFolder: "./articles/"
+
+      - name: 将输出发至评论区
+        run: gh issue comment "$NUMBER" --body "$BODY"
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          NUMBER: ${{ github.event.issue.number }}
+          BODY: |
+            - 原文网址: [${{ steps.fetch-md.outputs.title }}](${{ steps.fetch-md.outputs.original_url }})
+            - 原文作者: [${{ steps.fetch-md.outputs.author || 'anonymous' }}](${{ steps.fetch-md.outputs.author_url }})
+            - Markdown 文件: [点击编辑](${{ steps.fetch-md.outputs.editor_url }})
 
       - uses: stefanzweifel/git-auto-commit-action@v5
         with:
